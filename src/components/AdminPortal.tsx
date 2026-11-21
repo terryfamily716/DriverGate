@@ -47,35 +47,35 @@ export function AdminPortal({ adminToken, onAuthenticated, onSignOut }: AdminPor
   const [loadingData, setLoadingData] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  const [statusFilter, setStatusFilter] = useState<'all' | CheckInStatus>('all);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<"all" | CheckInStatus>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [assignDriverBadge, setAssignDriverBadge] = useState(true);
   const [assignStewardBadge, setAssignStewardBadge] = useState(false);
-  const [reviewNote, setReviewNote] = useState('');
+  const [reviewNote, setReviewNote] = useState("");
   const [savingDecision, setSavingDecision] = useState(false);
   const [decisionMessage, setDecisionMessage] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     text: string;
   } | null>(null);
 
   const [showCompaniesPanel, setShowCompaniesPanel] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState('');
+  const [newCompanyName, setNewCompanyName] = useState("");
   const [addingCompany, setAddingCompany] = useState(false);
   const [companyError, setCompanyError] = useState<string | null>(null);
 
   const loadAuthStatus = useCallback(async () => {
     setCheckingAuth(true);
     try {
-      const res = await fetch('/api/admin/auth/status);
+      const res = await fetch("/api/admin/auth/status");
       if (!res.ok) {
-        throw new Error('Failed to check admin auth status);
+        throw new Error("Failed to check admin auth status");
       }
       const data = (await res.json()) as AdminAuthStatus;
       setAuthStatus(data);
     } catch {
-      setAuthError('Unable to reach server authentication status.');
+      setAuthError("Unable to reach server authentication status.");
     } finally {
       setCheckingAuth(false);
     }
@@ -91,20 +91,20 @@ export function AdminPortal({ adminToken, onAuthenticated, onSignOut }: AdminPor
     setDataError(null);
     try {
       const [checkInsRes, companiesRes] = await Promise.all([
-        fetch('/api/admin/checkins', {
+        fetch("/api/admin/checkins", {
           headers: { Authorization: `Bearer ${adminToken}` },
         }),
-        fetch('/api/companies'),
+        fetch("/api/companies"),
       ]);
 
       if (checkInsRes.status === 401) {
         onSignOut();
-        setAuthError('Administrator session expired. Please sign in again.');
+        setAuthError("Administrator session expired. Please sign in again.");
         return;
       }
 
       if (!checkInsRes.ok) {
-        throw new Error('Failed to load driver check-ins.');
+        throw new Error("Failed to load driver check-ins.");
       }
 
       const checkInsData = (await checkInsRes.json()) as {
@@ -123,11 +123,11 @@ export function AdminPortal({ adminToken, onAuthenticated, onSignOut }: AdminPor
         if (prev && checkInsData.checkIns.some((c) => c.id === prev)) {
           return prev;
         }
-        const firstPending = checkInsData.checkIns.find((c) => c.status === 'pending);
+        const firstPending = checkInsData.checkIns.find((c) => c.status === "pending");
         return firstPending?.id ?? checkInsData.checkIns[0]?.id ?? null;
       });
     } catch {
-      setDataError('Unable to load check-in queue.');
+      setDataError("Unable to load check-in queue.");
     } finally {
       setLoadingData(false);
     }
@@ -146,14 +146,14 @@ export function AdminPortal({ adminToken, onAuthenticated, onSignOut }: AdminPor
 
   useEffect(() => {
     if (!selectedCheckIn) return;
-    if (selectedCheckIn.status === 'pending') {
+    if (selectedCheckIn.status === "pending") {
       setAssignDriverBadge(true);
       setAssignStewardBadge(false);
-      setReviewNote('');
+      setReviewNote("");
     } else {
       setAssignDriverBadge(selectedCheckIn.badges.driverBadge);
       setAssignStewardBadge(selectedCheckIn.badges.shopStewardBadge);
-      setReviewNote(selectedCheckIn.reviewNote ?? '');
+      setReviewNote(selectedCheckIn.reviewNote ?? "");
     }
     setDecisionMessage(null);
   }, [selectedCheckIn]);
@@ -161,7 +161,7 @@ export function AdminPortal({ adminToken, onAuthenticated, onSignOut }: AdminPor
   const filteredCheckIns = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return checkIns.filter((item) => {
-      if (statusFilter !== 'all' && item.status !== statusFilter) {
+      if (statusFilter !== "all" && item.status !== statusFilter) {
         return false;
       }
       if (!q) return true;
@@ -178,32 +178,32 @@ export function AdminPortal({ adminToken, onAuthenticated, onSignOut }: AdminPor
     e.preventDefault();
     setAuthError(null);
     if (passcode.trim().length < 8) {
-      setAuthError('Passcode must be at least 8 characters long.');
+      setAuthError("Passcode must be at least 8 characters long.");
       return;
     }
     if (passcode !== confirmPasscode) {
-      setAuthError('Passcodes do not match.');
+      setAuthError("Passcodes do not match.");
       return;
     }
 
     setAuthSubmitting(true);
     try {
-      const res = await fetch('/api/admin/auth/claim', {
-        method: 'POST,
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/auth/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passcode }),
       });
       const payload = (await res.json()) as { token?: string; error?: string };
       if (!res.ok || !payload.token) {
-        setAuthError(payload.error ?? 'Unable to claim administrator passcode.');
+        setAuthError(payload.error ?? "Unable to claim administrator passcode.");
         await loadAuthStatus();
         return;
       }
-      setPasscode('');
-      setConfirmPasscode('');
+      setPasscode("");
+      setConfirmPasscode("");
       onAuthenticated(payload.token);
     } catch {
-      setAuthError('Network error while setting administrator passcode.');
+      setAuthError("Network error while setting administrator passcode.");
     } finally {
       setAuthSubmitting(false);
     }
@@ -213,26 +213,26 @@ export function AdminPortal({ adminToken, onAuthenticated, onSignOut }: AdminPor
     e.preventDefault();
     setAuthError(null);
     if (!passcode) {
-      setAuthError('Enter your administrator passcode.');
+      setAuthError("Enter your administrator passcode.");
       return;
     }
 
     setAuthSubmitting(true);
     try {
-      const res = await fetch('/api/admin/auth/login', {
-        method: 'POST,
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passcode }),
       });
       const payload = (await res.json()) as { token?: string; error?: string };
       if (!res.ok || !payload.token) {
-        setAuthError(payload.error ?? 'Invalid administrator passcode.');
+        setAuthError(payload.error ?? "Invalid administrator passcode.");
         return;
       }
-      setPasscode('');
+      setPasscode("");
       onAuthenticated(payload.token);
     } catch {
-      setAuthError('Network error while signing in.');
+      setAuthError("Network error while signing in.");
     } finally {
       setAuthSubmitting(false);
     }
