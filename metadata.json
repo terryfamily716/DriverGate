@@ -1,0 +1,6 @@
+{
+  "name": "DriverGate",
+  "description": "Driver profile check-in with live selfie verification and administrator-only Driver and Shop Steward badge assignment.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
