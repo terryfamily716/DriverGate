@@ -1,5 +1,7 @@
 export type CheckInStatus = 'pending' | 'approved' | 'declined';
 
+export type DriverRole = 'driver' | 'supervisor' | 'shop' | 'shopSteward' | 'admin';
+
 export interface Company {
   id: string;
   name: string;
@@ -9,8 +11,12 @@ export interface Company {
 
 export interface BadgeAssignment {
   driverBadge: boolean;
+  supervisorBadge: boolean;
+  shopBadge: boolean;
   shopStewardBadge: boolean;
   driverBadgeNumber: string | null;
+  supervisorBadgeNumber: string | null;
+  shopBadgeNumber: string | null;
   shopStewardBadgeNumber: string | null;
 }
 
@@ -23,6 +29,7 @@ export interface DriverCheckIn {
   companyName: string;
   selfieDataUrl: string;
   status: CheckInStatus;
+  role: DriverRole;
   badges: BadgeAssignment;
   submittedAt: string;
   reviewedAt: string | null;
@@ -39,6 +46,7 @@ export interface PublicCheckInSummary {
   companyName: string;
   selfieDataUrl: string;
   status: CheckInStatus;
+  role: DriverRole;
   badges: BadgeAssignment;
   submittedAt: string;
   reviewedAt: string | null;
@@ -57,5 +65,7 @@ export interface AdminStats {
   approved: number;
   declined: number;
   driverBadgesIssued: number;
+  supervisorBadgesIssued: number;
+  shopBadgesIssued: number;
   stewardBadgesIssued: number;
 }
